@@ -11,14 +11,18 @@ delay="100ms"
 jitter="10ms"
 interval="30"
 
+unquote () {
+    printf "$1" | tr -d "'"
+}
+
 while [ $# -gt 0 ]; do
     case $1 in
     -n)
-        interval="$2"
+        interval="$(unquote "$2")"
         shift
         ;;
     --interval|--name|--delay|--jitter)
-        declare "${1#--}"="$2"
+        declare "${1#--}"="$(unquote "$2")"
         shift
         ;;
     -d|--delete)
