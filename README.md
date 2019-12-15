@@ -47,7 +47,8 @@ docker run -d \
 
 ### Options
 
-- `--name` Container name regex filters (optional to delay all containers)
+- `--name` Container name regex filters
+  (optional, by default delaying all containers)
 - `--delay` Outgoing packets delay
 - `--jitter` Delay jitter
 
