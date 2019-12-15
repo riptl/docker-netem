@@ -1,5 +1,8 @@
 # Docker netem agent
 
+`netem-agent` is a container that artificially slows down a Docker network.
+I use it to test the behavior of distributed systems when exposed to real-world networking conditions.
+
 - Easily emulate properties of WANs in a Docker network via
   [`netem`](http://man7.org/linux/man-pages/man8/tc-netem.8.html)
   - Delay packets with jitter
@@ -48,10 +51,12 @@ docker run -d \
 
 ### Options
 
+- `--interval` Update interval
 - `--name` Container name regex filters
   (optional, by default delaying all containers)
 - `--delay` Outgoing packets delay
 - `--jitter` Delay jitter
+- `--delete` Delete all delays and exit
 
 ## Attributions
 

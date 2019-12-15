@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if ! options=$(getopt -l name:,delay:,jitter: -- "$@"); then
+if ! options=$(getopt -l name:,delay:,jitter:,delete -o "n:d" -- "$@"); then
     exit 1
 fi
 
@@ -9,12 +9,20 @@ set -- $options
 name=".*"
 delay="100ms"
 jitter="10ms"
+interval="30"
 
 while [ $# -gt 0 ]; do
     case $1 in
-    --name|--delay|--jitter)
+    -n)
+        interval="$2"
+        shift
+        ;;
+    --interval|--name|--delay|--jitter)
         declare "${1#--}"="$2"
         shift
+        ;;
+    -d|--delete)
+        declare delete=1
         ;;
     --)
         shift
@@ -33,14 +41,34 @@ get_ifaces() {
     bash /usr/bin/dockerveth.sh |
         mlr --tsv --headerless-csv-output \
             filter "\$VETH != \"not_found\"" then \
-            filter "\$NAMES =~ \"$name\"" then \
+            filter "\$NAMES =~ \"${name}\"" then \
             cut -f VETH
+}
+
+remove_netem() {
+    exists=$(tc qdisc show dev "${1}" | grep netem | awk '{print $2}')
+    if [ "${exists}" = "netem" ]; then
+        echo "Removing previous netem settings from $iface"
+        tc qdisc del dev "${1}" root netem
+    fi
 }
 
 update_netem () {
     for iface in $(get_ifaces); do
+        remove_netem $iface
         echo "Applying delay $delay, jitter $jitter on $iface"
+        tc qdisc add dev "${iface}" root netem delay "${delay}" "${jitter}"
     done
 }
 
-update_netem
+if [[ ! -z $delete ]]; then
+    for iface in $(ip link show type veth | sed -En 's/^.+(veth.+)@if.*$/\1/p'); do
+        remove_netem $iface
+    done
+    exit 0
+fi
+
+while true; do
+    update_netem
+    sleep "${interval}"
+done

@@ -24,3 +24,4 @@ COPY --from=miller-builder /bin/mlr /usr/bin/mlr
 COPY ./dockerveth/dockerveth.sh /usr/bin/dockerveth.sh
 COPY ./netem-agent /usr/bin/netem-agent
 ENTRYPOINT [ "/usr/bin/netem-agent" ]
+CMD ["--"]
