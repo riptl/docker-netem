@@ -6,7 +6,7 @@ fi
 
 set -- $options
 
-name="^" # matches everything
+name=".*"
 delay="100ms"
 jitter="10ms"
 
@@ -32,7 +32,7 @@ done
 get_ifaces() {
     bash /usr/bin/dockerveth.sh |
         mlr --tsv --headerless-csv-output \
-            filter "VETH != \"not_found\"" then \
+            filter "\$VETH != \"not_found\"" then \
             filter "\$NAMES =~ \"$name\"" then \
             cut -f VETH
 }

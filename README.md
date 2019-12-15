@@ -37,8 +37,9 @@ docker run -d \
   --name netem-agent \
   --cap-add=NET_ADMIN \
   --privileged \
+  --net=host \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
-  -v /var/run/docker/netns:/var/run/docker/netns:ro \
+  -v /var/run/docker/netns:/var/run/netns:ro \
   terorie/netem-agent \
   --name='^devnet_validator' \
   --delay=100ms \
