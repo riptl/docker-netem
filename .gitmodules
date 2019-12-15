@@ -1,0 +1,4 @@
+[submodule "dockerveth"]
+	path = dockerveth
+	url = https://github.com/terorie/dockerveth
+	branch = docker
