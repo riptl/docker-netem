@@ -41,34 +41,59 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-get_ifaces() {
+get_netnses() {
     bash /usr/bin/dockerveth.sh |
         mlr --tsv --headerless-csv-output \
             filter "\$VETH != \"not_found\"" then \
             filter "\$NAMES =~ \"${name}\"" then \
-            cut -f VETH
+            cut -f NETNS
 }
 
-remove_netem() {
-    exists=$(tc qdisc show dev "${1}" | grep netem | awk '{print $2}')
-    if [ "${exists}" = "netem" ]; then
-        echo "Removing previous netem settings from $iface"
-        tc qdisc del dev "${1}" root netem
-    fi
+# Add netem config inside netns
+netem_add () {
+    echo ip netns exec $1 tc qdisc add dev $2 root netem delay "${delay}" "${jitter}"
+    ip netns exec $1 tc qdisc add dev $2 root netem delay "${delay}" "${jitter}"
+}
+
+# Delete netem config inside netns
+netem_del () {
+    echo ip netns exec $1 tc qdisc del dev $2 root
+    ip netns exec $1 tc qdisc del dev $2 root 2>/dev/null
+}
+
+
+get_ifaces () {
+    echo ip netns exec $1 ip link show type veth >&2
+    ifaces=$(ip netns exec $1 ip link show type veth | sed -En 's/^.+: (.+)@if.*$/\1/p')
+    for iface in $ifaces; do
+        if [ "$iface" != "lo" ]; then
+            echo "$iface"
+        fi
+    done
 }
 
 update_netem () {
-    for iface in $(get_ifaces); do
-        remove_netem $iface
-        echo "Applying delay $delay, jitter $jitter on $iface"
-        tc qdisc add dev "${iface}" root netem delay "${delay}" "${jitter}"
+    for netns in $(get_netnses); do
+        echo "Applying delay $delay, jitter $jitter on $netns"
+        for iface in $(get_ifaces "$netns"); do
+            netem_del "$netns" "$iface"
+            netem_add "$netns" "$iface"
+        done
+    done
+}
+
+prune_netem() {
+    for netns in $(get_netnses); do
+        echo "Pruning netem config from $netns"
+        for iface in $(get_ifaces "$netns"); do
+            netem_del "$netns" "$iface"
+        done
     done
 }
 
 if [[ ! -z $delete ]]; then
-    for iface in $(ip link show type veth | sed -En 's/^.+(veth.+)@if.*$/\1/p'); do
-        remove_netem $iface
-    done
+    echo "Deleting all netem configs and exiting"
+    prune_netem
     exit 0
 fi
 

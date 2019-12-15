@@ -36,7 +36,7 @@ Requirements:
 
 Example:
 ```shell
-docker run -d \
+docker run -it --rm \
   --name netem-agent \
   --cap-add=NET_ADMIN \
   --privileged \
@@ -44,7 +44,7 @@ docker run -d \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -v /var/run/docker/netns:/var/run/netns:ro \
   terorie/netem-agent \
-  --name='^devnet_validator' \
+  --name='^dummy.*' \
   --delay=100ms \
   --jitter=50ms
 ```
