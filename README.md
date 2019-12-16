@@ -9,11 +9,8 @@ I use it to test the behavior of distributed systems when exposed to real-world 
   - Introduce packet loss, reordering, etc.
 - Works in Swarm mode, Requires no special preparation of the target containers
   - Unlike e.g. [`pumba`](https://github.com/alexei-led/pumba), a powerful chaos-testing tool
-    which needs the `iproute2` package and `NET_ADMIN` privilege in the target containers.
-  - `--cap-add=NET_ADMIN` on services is impossible with Docker Swarm
-    (https://github.com/moby/moby/issues/25885). `docker-netem` works around this.
+    which needs the `iproute2` package in the target containers.
 - Relies on standard Linux tooling
-- Light alpine container
 
 ### How does it work?
 
@@ -32,7 +29,7 @@ Requirements:
   (TODO Make it work with less privileges)
 - Access to Docker network namespaces
 - Host networking enabled on agent
-- Running as regular Docker container, not service
+- Running as regular Docker container, not Swarm service
 
 Example:
 ```shell
