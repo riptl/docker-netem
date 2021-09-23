@@ -12,6 +12,23 @@ I use it to test the behavior of distributed systems when exposed to real-world 
     which needs the `iproute2` package in the target containers.
 - Relies on standard Linux tooling
 
+### How to check out (AppNeta specific)
+
+- Set up docker on Ubuntu 20.04 using [these instructions](https://docs.docker.com/engine/install/ubuntu/)
+- Open  a terminal and execute:
+  - `mkdir -p ~/git; cd ~/git`
+  - `git clone git@github.com:appneta/dockerveth.git && cd dockerveth`
+  - `git checkout docker`
+  - `git remote add -t docker upstream https://github.com/terorie/dockerveth.git`
+  - `git update`
+  - `cd ~/git`
+  - `git clone git@github.com:appneta/docker-netem.git && cd docker-netem`
+  - `git submodule update --init`
+  - `git remote add upstream https://github.com/terorie/docker-netem.git`
+  - `git update`
+
+Now you are ready to do work in `~/git/docker-netem`. You will find that `dockerverth/dockerverth.sh` is linked as a submodule of `dockerverth` repo. If you need to change this file, do so in `~/git/dockerverth`.
+
 ### How does it work?
 
 It uses [dockerveth](https://github.com/micahculpepper/dockerveth/tree/develop)
